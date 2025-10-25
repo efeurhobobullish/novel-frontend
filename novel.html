@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Novel</title>
+  <style>
+    body { font-family: Arial; margin:20px; }
+    .ep { padding:10px; border-bottom:1px solid #ddd; }
+    a { color:#007BFF; }
+  </style>
+</head>
+<body>
+  <h1 id="title"></h1>
+  <p id="desc"></p>
+  <h2>Episodes</h2>
+  <div id="episodes"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function loadNovel(){
+      const res = await fetch("https://novel-api-r1zv.onrender.com/api/novels");
+      const novels = await res.json();
+      const novel = novels.find(n=>n._id===id);
+      document.getElementById("title").innerText=novel.title;
+      document.getElementById("desc").innerText=novel.description;
+      const epContainer=document.getElementById("episodes");
+      novel.episodes.forEach(ep=>{
+        epContainer.innerHTML+=`<div class="ep"><a href="episode.html?id=${ep._id}">${ep.title}</a></div>`;
+      });
+    }
+    loadNovel();
+  </script>
+</body>
+</html>
