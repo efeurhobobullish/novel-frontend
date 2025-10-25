@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Novel Site - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="p-6 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">📚 Novels</h1>
+    <div id="novels" class="grid gap-4"></div>
+  </div>
+
+  <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
+
+    async function loadNovels() {
+      let res = await fetch(`${API}/novels`);
+      let novels = await res.json();
+      let container = document.getElementById("novels");
+      container.innerHTML = novels.map(n => `
+        <div class="bg-white p-4 rounded shadow">
+          <h2 class="text-xl font-semibold">${n.title}</h2>
+          <p>${n.description || ""}</p>
+          <a href="novel.html?id=${n._id}" class="text-blue-500">Read more →</a>
+        </div>
+      `).join("");
+    }
+    loadNovels();
+  </script>
+</body>
+</html>
