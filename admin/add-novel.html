@@ -3,34 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <title>Add Novel</title>
-  <style>
-    body { font-family: Arial; margin:20px; }
-    input, textarea { display:block; margin:10px 0; width:300px; padding:8px; }
-    button { background:#28a745; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Add Novel</h1>
-  <input id="title" placeholder="Title">
-  <input id="cover" placeholder="Cover URL">
-  <input id="genre" placeholder="Genre">
-  <textarea id="description" placeholder="Description"></textarea>
-  <button onclick="addNovel()">Save</button>
+<body class="p-6 bg-gray-100">
+  <div class="max-w-xl mx-auto bg-white shadow rounded p-6">
+    <h1 class="text-2xl font-bold mb-4">➕ Add Novel</h1>
+
+    <input id="title" placeholder="Title" class="border w-full mb-3 p-2 rounded">
+    <input id="genre" placeholder="Genre" class="border w-full mb-3 p-2 rounded">
+    <input id="cover" placeholder="Cover Image URL" class="border w-full mb-3 p-2 rounded">
+    <textarea id="description" placeholder="Description" class="border w-full mb-3 p-2 rounded"></textarea>
+
+    <button onclick="addNovel()" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Save</button>
+
+    <p id="msg" class="mt-4 text-sm text-red-500"></p>
+  </div>
 
   <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
     const token = localStorage.getItem("token");
-    async function addNovel(){
-      const title=document.getElementById("title").value;
-      const cover=document.getElementById("cover").value;
-      const genre=document.getElementById("genre").value;
-      const description=document.getElementById("description").value;
-      const res=await fetch("https://novel-api-r1zv.onrender.com/api/admin/novel",{
-        method:"POST",
-        headers:{ "Authorization":`Bearer ${token}`, "Content-Type":"application/json" },
-        body:JSON.stringify({title,cover,genre,description})
-      });
-      const data=await res.json();
-      alert("Novel added!");
+
+    async function addNovel() {
+      const title = document.getElementById("title").value;
+      const genre = document.getElementById("genre").value;
+      const cover = document.getElementById("cover").value;
+      const description = document.getElementById("description").value;
+      const msg = document.getElementById("msg");
+
+      if (!token) {
+        msg.innerText = "⚠️ You must login as admin first.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/admin/novel`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ title, genre, cover, description })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          msg.classList.replace("text-red-500", "text-green-600");
+          msg.innerText = "✅ Novel added successfully!";
+          document.getElementById("title").value = "";
+          document.getElementById("genre").value = "";
+          document.getElementById("cover").value = "";
+          document.getElementById("description").value = "";
+        } else {
+          msg.innerText = data.error || "Failed to add novel.";
+          console.error("Error:", data);
+        }
+      } catch (err) {
+        msg.innerText = "❌ Network error: " + err.message;
+        console.error(err);
+      }
     }
   </script>
 </body>
