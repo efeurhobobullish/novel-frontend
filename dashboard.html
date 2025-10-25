@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Novels</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-6xl mx-auto p-6">
+    <header class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-blue-600">📖 All Novels</h1>
+      <nav class="space-x-4">
+        <a href="index.html" class="hover:text-blue-500">Home</a>
+        <a href="wallet.html" class="hover:text-blue-500">Wallet</a>
+      </nav>
+    </header>
+
+    <div id="novelGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+  </div>
+
+  <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
+    async function loadNovels() {
+      const res = await fetch(`${API}/novels`);
+      const novels = await res.json();
+      const grid = document.getElementById("novelGrid");
+      grid.innerHTML = novels.map(n => `
+        <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+          <img src="${n.cover}" class="w-full h-48 object-cover rounded mb-3">
+          <h2 class="text-lg font-bold">${n.title}</h2>
+          <p class="text-sm text-gray-600 mb-2">${n.genre || "Unknown Genre"}</p>
+          <a href="novel.html?id=${n._id}" class="text-blue-500">View Details</a>
+        </div>
+      `).join("");
+    }
+    loadNovels();
+  </script>
+</body>
+</html>
