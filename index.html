@@ -2,32 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Novel Site - Home</title>
+  <title>Novel World - Showcase</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900">
-  <div class="p-6 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">📚 Novels</h1>
-    <div id="novels" class="grid gap-4"></div>
+  <div class="max-w-6xl mx-auto p-6">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-blue-600">📚 Novel World</h1>
+      <nav class="space-x-4">
+        <a href="login.html" class="hover:text-blue-500">Login</a>
+        <a href="register.html" class="hover:text-blue-500">Register</a>
+        <a href="dashboard.html" class="hover:text-blue-500">Browse Novels</a>
+        <a href="wallet.html" class="hover:text-blue-500">Wallet</a>
+      </nav>
+    </header>
+
+    <!-- Featured Novel -->
+    <section id="featured" class="bg-white shadow rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-bold mb-4">🌟 Featured Novel</h2>
+      <div id="featuredContent" class="flex gap-6 items-center"></div>
+    </section>
+
+    <!-- Genres -->
+    <section>
+      <h2 class="text-xl font-bold mb-4">Genres</h2>
+      <div id="genres" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    </section>
   </div>
 
   <script>
     const API = "https://novel-api-r1zv.onrender.com/api";
 
-    async function loadNovels() {
-      let res = await fetch(`${API}/novels`);
-      let novels = await res.json();
-      let container = document.getElementById("novels");
-      container.innerHTML = novels.map(n => `
-        <div class="bg-white p-4 rounded shadow">
-          <h2 class="text-xl font-semibold">${n.title}</h2>
-          <p>${n.description || ""}</p>
-          <a href="novel.html?id=${n._id}" class="text-blue-500">Read more →</a>
+    async function loadFeatured() {
+      const res = await fetch(`${API}/novels`);
+      const novels = await res.json();
+      if (!novels.length) return;
+      const n = novels[0];
+      document.getElementById("featuredContent").innerHTML = `
+        <img src="${n.cover}" class="w-40 h-56 object-cover rounded shadow">
+        <div>
+          <h3 class="text-2xl font-bold">${n.title}</h3>
+          <p class="text-gray-600 mb-3">${n.description.substring(0,120)}...</p>
+          <a href="novel.html?id=${n._id}" class="bg-blue-500 text-white px-4 py-2 rounded">Read Now</a>
         </div>
+      `;
+    }
+
+    function loadGenres() {
+      const genres = ["Romance", "Action", "Fantasy", "Drama", "Comedy", "Sci-Fi", "Horror", "Mystery"];
+      document.getElementById("genres").innerHTML = genres.map(g => `
+        <div class="bg-white p-4 rounded shadow text-center hover:bg-blue-50">${g}</div>
       `).join("");
     }
-    loadNovels();
+
+    loadFeatured();
+    loadGenres();
   </script>
 </body>
 </html>
