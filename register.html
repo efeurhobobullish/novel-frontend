@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-100">
+  <div class="bg-white p-6 rounded shadow max-w-sm w-full">
+    <h1 class="text-2xl mb-4 font-bold">Register</h1>
+    <input id="username" placeholder="Username" class="w-full border p-2 mb-2 rounded">
+    <input id="email" type="email" placeholder="Email" class="w-full border p-2 mb-2 rounded">
+    <input id="password" type="password" placeholder="Password" class="w-full border p-2 mb-4 rounded">
+    <button onclick="register()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Register</button>
+    <p class="text-sm mt-2">Already have an account? <a href="login.html" class="text-blue-600">Login</a></p>
+  </div>
+
+  <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
+    async function register() {
+      let res = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value
+        })
+      });
+      let data = await res.json();
+      if (data._id) {
+        alert("Registered successfully, now login");
+        window.location = "login.html";
+      } else {
+        alert(data.error || "Failed to register");
+      }
+    }
+  </script>
+</body>
+</html>
