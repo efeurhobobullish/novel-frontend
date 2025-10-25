@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wallet</title>
+  <style>
+    body { font-family: Arial; margin:20px; background:#fafafa; }
+    .txn { padding:10px; border-bottom:1px solid #ddd; }
+    button { background:#007BFF; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer; margin:5px 0; }
+  </style>
+</head>
+<body>
+  <h1>💰 Wallet</h1>
+  <p>Balance: <span id="balance">0</span> coins</p>
+  <button onclick="buyCoins(1000,100)">Buy 100 coins for ₦1000</button>
+  <h2>Transactions</h2>
+  <div id="txns"></div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    async function loadWallet(){
+      const res = await fetch("http://localhost:5000/api/wallet", {
+        headers:{ "Authorization":`Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById("balance").innerText = data.balance;
+      const txns = document.getElementById("txns");
+      txns.innerHTML="";
+      data.transactions.forEach(t=>{
+        txns.innerHTML += `<div class="txn">${t.type} - ${t.status} - ${t.coins} coins</div>`;
+      });
+    }
+
+    async function buyCoins(amount, coins){
+      const res = await fetch("https://novel-api-r1zv.onrender.com/api/wallet/recharge", {
+        method:"POST",
+        headers:{
+          "Authorization":`Bearer ${token}`,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({ amount, coins })
+      });
+      const data = await res.json();
+      window.open(data.authorization_url, "_blank");
+    }
+
+    loadWallet();
+  </script>
+</body>
+</html>
