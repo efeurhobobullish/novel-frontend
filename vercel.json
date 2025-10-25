@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/login", "dest": "/login.html" },
+    { "src": "/register", "dest": "/register.html" },
+    { "src": "/wallet", "dest": "/wallet.html" },
+    { "src": "/novel", "dest": "/novel.html" },
+    { "src": "/episode", "dest": "/episode.html" },
+
+    { "src": "/admin", "dest": "/admin/dashboard.html" },
+    { "src": "/admin/add-novel", "dest": "/admin/add-novel.html" },
+    { "src": "/admin/add-episode", "dest": "/admin/add-episode.html" }
+  ]
+}
