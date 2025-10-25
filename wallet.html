@@ -3,46 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <title>Wallet</title>
-  <style>
-    body { font-family: Arial; margin:20px; background:#fafafa; }
-    .txn { padding:10px; border-bottom:1px solid #ddd; }
-    button { background:#007BFF; color:#fff; border:none; padding:10px; border-radius:5px; cursor:pointer; margin:5px 0; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>💰 Wallet</h1>
-  <p>Balance: <span id="balance">0</span> coins</p>
-  <button onclick="buyCoins(1000,100)">Buy 100 coins for ₦1000</button>
-  <h2>Transactions</h2>
-  <div id="txns"></div>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-2xl font-bold mb-4">💰 Wallet</h1>
+  <div id="balance" class="mb-4"></div>
+  <button onclick="buyCoins()" class="bg-blue-500 text-white px-4 py-2 rounded">Buy 100 Coins (₦1000)</button>
+  <h2 class="text-xl mt-6 mb-2">Transactions</h2>
+  <ul id="txns" class="space-y-2"></ul>
 
   <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
     const token = localStorage.getItem("token");
 
-    async function loadWallet(){
-      const res = await fetch("http://localhost:5000/api/wallet", {
-        headers:{ "Authorization":`Bearer ${token}` }
-      });
+    async function loadWallet() {
+      const res = await fetch(`${API}/wallet`, { headers: { Authorization: `Bearer ${token}` }});
       const data = await res.json();
-      document.getElementById("balance").innerText = data.balance;
-      const txns = document.getElementById("txns");
-      txns.innerHTML="";
-      data.transactions.forEach(t=>{
-        txns.innerHTML += `<div class="txn">${t.type} - ${t.status} - ${t.coins} coins</div>`;
-      });
+      document.getElementById("balance").innerText = `Balance: ${data.balance} coins`;
+      document.getElementById("txns").innerHTML = data.transactions.map(t => `
+        <li class="bg-white p-2 rounded shadow">
+          ${t.type.toUpperCase()} - ${t.status} (${t.coins} coins)
+        </li>
+      `).join("");
     }
 
-    async function buyCoins(amount, coins){
-      const res = await fetch("https://novel-api-r1zv.onrender.com/api/wallet/recharge", {
-        method:"POST",
-        headers:{
-          "Authorization":`Bearer ${token}`,
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({ amount, coins })
+    async function buyCoins() {
+      const res = await fetch(`${API}/wallet/recharge`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount: 1000, coins: 100 })
       });
       const data = await res.json();
-      window.open(data.authorization_url, "_blank");
+      window.location = data.authorization_url;
     }
 
     loadWallet();
