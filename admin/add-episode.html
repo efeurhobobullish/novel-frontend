@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Episode</title>
+  <style>
+    body { font-family: Arial; margin:20px; }
+    input, textarea { display:block; margin:10px 0; width:300px; padding:8px; }
+    button { background:#007BFF; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Add Episode</h1>
+  <input id="novelId" placeholder="Novel ID">
+  <input id="title" placeholder="Episode Title">
+  <textarea id="content" placeholder="Content"></textarea>
+  <label><input type="checkbox" id="isFree"> Free Episode</label>
+  <input id="price" type="number" placeholder="Price (coins)">
+  <button onclick="addEpisode()">Save</button>
+
+  <script>
+    const token = localStorage.getItem("token");
+    async function addEpisode(){
+      const novelId=document.getElementById("novelId").value;
+      const title=document.getElementById("title").value;
+      const content=document.getElementById("content").value;
+      const isFree=document.getElementById("isFree").checked;
+      const price=parseInt(document.getElementById("price").value||0);
+      const res=await fetch("https://novel-api-r1zv.onrender.com/api/admin/episode",{
+        method:"POST",
+        headers:{ "Authorization":`Bearer ${token}`, "Content-Type":"application/json" },
+        body:JSON.stringify({novelId,title,content,isFree,price})
+      });
+      const data=await res.json();
+      alert("Episode added!");
+    }
+  </script>
+</body>
+</html>
