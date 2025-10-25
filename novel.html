@@ -2,34 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Novel</title>
-  <style>
-    body { font-family: Arial; margin:20px; }
-    .ep { padding:10px; border-bottom:1px solid #ddd; }
-    a { color:#007BFF; }
-  </style>
+  <title>Novel Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1 id="title"></h1>
-  <p id="desc"></p>
-  <h2>Episodes</h2>
-  <div id="episodes"></div>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-3xl mx-auto bg-white shadow rounded p-6">
+    <div id="novelInfo" class="mb-6">Loading novel...</div>
+    <h3 class="text-xl font-bold mb-3">Episodes</h3>
+    <ul id="episodeList" class="space-y-3"></ul>
+  </div>
 
   <script>
+    const API = "https://novel-api-r1zv.onrender.com/api";
     const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+    const novelId = params.get("id");
 
-    async function loadNovel(){
-      const res = await fetch("https://novel-api-r1zv.onrender.com/api/novels");
-      const novels = await res.json();
-      const novel = novels.find(n=>n._id===id);
-      document.getElementById("title").innerText=novel.title;
-      document.getElementById("desc").innerText=novel.description;
-      const epContainer=document.getElementById("episodes");
-      novel.episodes.forEach(ep=>{
-        epContainer.innerHTML+=`<div class="ep"><a href="episode.html?id=${ep._id}">${ep.title}</a></div>`;
-      });
+    async function loadNovel() {
+      try {
+        const res = await fetch(`${API}/novels/${novelId}`);
+        const novel = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Novel not found</p>";
+          return;
+        }
+
+        document.getElementById("novelInfo").innerHTML = `
+          <h1 class="text-2xl font-bold mb-2">${novel.title}</h1>
+          <img src="${novel.cover || 'https://via.placeholder.com/200x300'}" class="w-40 h-56 object-cover rounded mb-3">
+          <p class="mb-3">${novel.description || ""}</p>
+          <p class="text-sm text-gray-600">Genre: ${novel.genre || "Unknown"}</p>
+          <p class="text-sm text-gray-600">Views: ${novel.views}</p>
+        `;
+
+        document.getElementById("episodeList").innerHTML = novel.episodes.map(e => `
+          <li class="bg-gray-50 p-3 rounded flex justify-between items-center">
+            <span>${e.title}</span>
+            <a href="episode.html?id=${e._id}" class="text-blue-500">
+              ${e.isFree ? "Read Free" : `Unlock (${e.price} coins)`}
+            </a>
+          </li>
+        `).join("");
+      } catch (err) {
+        console.error(err);
+        document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Error loading novel</p>";
+      }
     }
+
     loadNovel();
   </script>
 </body>
