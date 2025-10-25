@@ -6,34 +6,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex items-center justify-center h-screen bg-gray-100">
-  <div class="bg-white p-6 rounded shadow max-w-sm w-full">
-    <h1 class="text-2xl mb-4 font-bold">Register</h1>
-    <input id="username" placeholder="Username" class="w-full border p-2 mb-2 rounded">
-    <input id="email" type="email" placeholder="Email" class="w-full border p-2 mb-2 rounded">
-    <input id="password" type="password" placeholder="Password" class="w-full border p-2 mb-4 rounded">
-    <button onclick="register()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Register</button>
-    <p class="text-sm mt-2">Already have an account? <a href="login.html" class="text-blue-600">Login</a></p>
+  <div class="bg-white p-6 rounded shadow w-96">
+    <h1 class="text-xl font-bold mb-4 text-center">Register</h1>
+    <input id="username" placeholder="Username" class="border w-full mb-3 p-2 rounded">
+    <input id="email" type="email" placeholder="Email" class="border w-full mb-3 p-2 rounded">
+    <input id="password" type="password" placeholder="Password" class="border w-full mb-3 p-2 rounded">
+    <button onclick="register()" class="bg-green-500 text-white w-full p-2 rounded">Register</button>
+    <p class="mt-2 text-sm text-center">Already have an account? <a href="login.html" class="text-blue-500">Login</a></p>
   </div>
 
   <script>
     const API = "https://novel-api-r1zv.onrender.com/api";
     async function register() {
-      let res = await fetch(`${API}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: document.getElementById("username").value,
-          email: document.getElementById("email").value,
-          password: document.getElementById("password").value
-        })
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const res = await fetch(`${API}/auth/register`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password })
       });
-      let data = await res.json();
+      const data = await res.json();
       if (data._id) {
-        alert("Registered successfully, now login");
+        alert("Registration successful!");
         window.location = "login.html";
-      } else {
-        alert(data.error || "Failed to register");
-      }
+      } else alert(data.error || "Failed");
     }
   </script>
 </body>
