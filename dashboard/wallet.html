@@ -4,12 +4,17 @@
   <meta charset="UTF-8">
   <title>Dashboard - Wallet</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body class="bg-gray-100 pb-16">
   <div class="max-w-3xl mx-auto p-4">
     <h1 class="text-xl font-bold mb-4">💰 Wallet</h1>
     <p id="walletBalance">Loading balance...</p>
-    <button class="bg-green-500 text-white px-4 py-2 rounded mt-4">Add Coins</button>
+
+    <div class="mt-4 space-y-3">
+      <button onclick="payWithPaystack(500)" class="bg-green-500 text-white px-4 py-2 rounded w-full">Buy 500 Coins (₦500)</button>
+      <button onclick="payWithPaystack(1000)" class="bg-green-600 text-white px-4 py-2 rounded w-full">Buy 1000 Coins (₦1000)</button>
+    </div>
   </div>
 
   <!-- Navbar -->
@@ -42,6 +47,34 @@
     } catch {
       document.getElementById("walletBalance").innerText = "Error loading balance";
     }
+  }
+
+  function payWithPaystack(amount) {
+    let handler = PaystackPop.setup({
+      key: "pk_test_xxxxx", // replace with your Paystack public key
+      email: "user@example.com", // dynamic if needed
+      amount: amount * 100,
+      currency: "NGN",
+      callback: function(response) {
+        // verify payment
+        fetch(`${API}/wallet/verify/${response.reference}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              alert("✅ Coins added! New balance: " + data.coins);
+              loadWallet();
+            } else {
+              alert("❌ Payment failed");
+            }
+          });
+      },
+      onClose: function() {
+        alert("Payment window closed");
+      }
+    });
+    handler.openIframe();
   }
 
   loadWallet();
