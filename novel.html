@@ -12,29 +12,35 @@
     <ul id="episodeList" class="space-y-3"></ul>
   </div>
 
-  <script>
-    const API = "https://novel-api-r1zv.onrender.com/api";
-    const params = new URLSearchParams(window.location.search);
-    const novelId = params.get("id");
+<script>
+  const API = "https://novel-api-r1zv.onrender.com/api";
+  const params = new URLSearchParams(window.location.search);
+  const novelId = params.get("id");
 
-    async function loadNovel() {
-      try {
-        const res = await fetch(`${API}/novels/${novelId}`);
-        const novel = await res.json();
+  console.log("📡 Loading novel with ID:", novelId);
 
-        if (!res.ok) {
-          document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Novel not found</p>";
-          return;
-        }
+  async function loadNovel() {
+    try {
+      const res = await fetch(`${API}/novels/${novelId}`);
+      console.log("📡 Fetch status:", res.status);
 
-        document.getElementById("novelInfo").innerHTML = `
-          <h1 class="text-2xl font-bold mb-2">${novel.title}</h1>
-          <img src="${novel.cover || 'https://via.placeholder.com/200x300'}" class="w-40 h-56 object-cover rounded mb-3">
-          <p class="mb-3">${novel.description || ""}</p>
-          <p class="text-sm text-gray-600">Genre: ${novel.genre || "Unknown"}</p>
-          <p class="text-sm text-gray-600">Views: ${novel.views}</p>
-        `;
+      const novel = await res.json();
+      console.log("📚 Novel data:", novel);
 
+      if (!res.ok) {
+        document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Novel not found</p>";
+        return;
+      }
+
+      document.getElementById("novelInfo").innerHTML = `
+        <h1 class="text-2xl font-bold mb-2">${novel.title}</h1>
+        <img src="${novel.cover || 'https://via.placeholder.com/200x300'}" class="w-40 h-56 object-cover rounded mb-3">
+        <p class="mb-3">${novel.description || ""}</p>
+        <p class="text-sm text-gray-600">Genre: ${novel.genre || "Unknown"}</p>
+        <p class="text-sm text-gray-600">Views: ${novel.views || 0}</p>
+      `;
+
+      if (novel.episodes && novel.episodes.length) {
         document.getElementById("episodeList").innerHTML = novel.episodes.map(e => `
           <li class="bg-gray-50 p-3 rounded flex justify-between items-center">
             <span>${e.title}</span>
@@ -43,13 +49,16 @@
             </a>
           </li>
         `).join("");
-      } catch (err) {
-        console.error(err);
-        document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Error loading novel</p>";
+      } else {
+        document.getElementById("episodeList").innerHTML = "<p class='text-gray-500'>No episodes yet.</p>";
       }
+    } catch (err) {
+      console.error("⚠️ Error:", err);
+      document.getElementById("novelInfo").innerHTML = "<p class='text-red-500'>Error loading novel</p>";
     }
+  }
 
-    loadNovel();
-  </script>
+  loadNovel();
+</script>
 </body>
 </html>
