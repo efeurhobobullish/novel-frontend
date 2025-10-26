@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 pb-16">
+  <div class="max-w-3xl mx-auto p-4">
+    <h1 class="text-xl font-bold mb-4">👤 Profile</h1>
+    <div id="profileInfo">Loading...</div>
+    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded mt-4">Logout</button>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="bg-white border-t shadow p-2 flex justify-around fixed bottom-0 left-0 right-0">
+    <a href="home.html" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>🏠</span><span class="text-xs">Home</span>
+    </a>
+    <a href="reads.html" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>📚</span><span class="text-xs">My Reads</span>
+    </a>
+    <a href="wallet.html" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>💰</span><span class="text-xs">Wallet</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center text-blue-600">
+      <span>👤</span><span class="text-xs">Profile</span>
+    </a>
+  </nav>
+
+<script>
+  const API = "https://novel-api-r1zv.onrender.com/api";
+  const token = localStorage.getItem("token");
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API}/auth/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById("profileInfo").innerHTML = `
+        <p><b>Username:</b> ${data.username}</p>
+        <p><b>Email:</b> ${data.email}</p>
+        <p><b>Role:</b> ${data.role}</p>
+        <p><b>Coins:</b> ${data.coins}</p>
+      `;
+    } catch {
+      document.getElementById("profileInfo").innerText = "Error loading profile";
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location = "../login.html";
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>
