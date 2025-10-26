@@ -2,101 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Dashboard - Home</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex flex-col h-screen">
+<body class="bg-gray-50 flex flex-col h-screen">
 
-  <!-- Main Content -->
-  <main id="pageContent" class="flex-1 overflow-y-auto p-4">
-    <h1 class="text-xl font-bold mb-4">Welcome to SwiftNovel 📚</h1>
-    <div id="dashboardSection">Loading...</div>
+  <!-- Content -->
+  <main class="flex-1 overflow-y-auto pb-20 p-4">
+    <h1 class="text-xl font-bold mb-4 text-gray-800">📚 All Novels</h1>
+    <div id="novelGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
   </main>
 
   <!-- Bottom Navbar -->
-  <nav class="bg-white border-t shadow p-2 flex justify-around fixed bottom-0 left-0 right-0">
-    <button onclick="showPage('home')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-      <span>🏠</span>
-      <span class="text-xs">Home</span>
-    </button>
-    <button onclick="showPage('reads')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-      <span>📚</span>
-      <span class="text-xs">My Reads</span>
-    </button>
-    <button onclick="showPage('wallet')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-      <span>💰</span>
-      <span class="text-xs">Wallet</span>
-    </button>
-    <button onclick="showPage('profile')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-      <span>👤</span>
-      <span class="text-xs">Profile</span>
-    </button>
+  <nav class="bg-white border-t shadow-lg fixed bottom-0 left-0 right-0 flex justify-around py-2">
+    <a href="home.html" class="flex flex-col items-center text-blue-600">
+      <span>🏠</span><span class="text-xs">Home</span>
+    </a>
+    <a href="reads.html" class="flex flex-col items-center text-gray-500 hover:text-blue-500">
+      <span>📖</span><span class="text-xs">Reads</span>
+    </a>
+    <a href="wallet.html" class="flex flex-col items-center text-gray-500 hover:text-blue-500">
+      <span>💰</span><span class="text-xs">Wallet</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center text-gray-500 hover:text-blue-500">
+      <span>👤</span><span class="text-xs">Profile</span>
+    </a>
   </nav>
 
 <script>
   const API = "https://novel-api-r1zv.onrender.com/api";
-  const token = localStorage.getItem("token");
-  if (!token) window.location = "login.html";
 
-  async function loadUser() {
+  async function loadNovels() {
     try {
-      const res = await fetch(`${API}/auth/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
+      const res = await fetch(`${API}/novels`);
+      const novels = await res.json();
 
-      if (!res.ok) {
-        document.getElementById("dashboardSection").innerText = "Failed to load user";
-        return;
-      }
-
-      window.userData = data; // save globally
-      showPage('home'); // load home by default
-    } catch (err) {
-      document.getElementById("dashboardSection").innerText = "Error loading dashboard";
+      document.getElementById("novelGrid").innerHTML = novels.map(n => `
+        <div class="bg-white rounded-lg shadow hover:shadow-md transition p-2">
+          <img src="${n.cover || 'https://via.placeholder.com/200x300'}" 
+               class="w-full h-40 object-cover rounded mb-2">
+          <h2 class="text-sm font-semibold truncate">${n.title}</h2>
+          <p class="text-xs text-gray-500 mb-1">${n.genre || "Unknown"}</p>
+          <a href="../novel.html?id=${n._id}" 
+             class="text-xs text-blue-500 hover:underline">Read More</a>
+        </div>
+      `).join("");
+    } catch {
+      document.getElementById("novelGrid").innerHTML = 
+        "<p class='text-red-500'>Failed to load novels.</p>";
     }
   }
 
-  function showPage(page) {
-    if (page === 'home') {
-      document.getElementById("dashboardSection").innerHTML = `
-        <h2 class="text-lg font-bold mb-2">All Novels</h2>
-        <iframe src="index.html" class="w-full h-[70vh] border-0"></iframe>
-      `;
-    }
-
-    if (page === 'reads') {
-      document.getElementById("dashboardSection").innerHTML = `
-        <h2 class="text-lg font-bold mb-2">My Reads</h2>
-        <p class="text-gray-600">Feature coming soon...</p>
-      `;
-    }
-
-    if (page === 'wallet') {
-      document.getElementById("dashboardSection").innerHTML = `
-        <h2 class="text-lg font-bold mb-2">Wallet</h2>
-        <p class="mb-2">Balance: <b>${window.userData.coins || 0} coins</b></p>
-        <button class="bg-green-500 text-white px-4 py-2 rounded">Add Coins</button>
-      `;
-    }
-
-    if (page === 'profile') {
-      document.getElementById("dashboardSection").innerHTML = `
-        <h2 class="text-lg font-bold mb-2">Profile</h2>
-        <p><b>Username:</b> ${window.userData.username}</p>
-        <p><b>Email:</b> ${window.userData.email}</p>
-        <p><b>Role:</b> ${window.userData.role}</p>
-        <button onclick="logout()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Logout</button>
-      `;
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem("token");
-    window.location = "login.html";
-  }
-
-  loadUser();
+  loadNovels();
 </script>
 </body>
 </html>
