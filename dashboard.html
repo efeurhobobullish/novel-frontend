@@ -2,51 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Dashboard</title>
+  <title>Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-2xl mx-auto bg-white shadow rounded p-6">
-    <h1 class="text-2xl font-bold mb-4">👤 User Dashboard</h1>
-    <div id="userInfo" class="mb-4">Loading...</div>
-    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
-  </div>
+<body class="bg-gray-100 flex flex-col h-screen">
 
-  <script>
-    const API = "https://novel-api-r1zv.onrender.com/api/auth";
-    const token = localStorage.getItem("token");
+  <!-- Main Content -->
+  <main id="pageContent" class="flex-1 overflow-y-auto p-4">
+    <h1 class="text-xl font-bold mb-4">Welcome to SwiftNovel 📚</h1>
+    <div id="dashboardSection">Loading...</div>
+  </main>
 
-    if (!token) window.location = "login.html";
+  <!-- Bottom Navbar -->
+  <nav class="bg-white border-t shadow p-2 flex justify-around fixed bottom-0 left-0 right-0">
+    <button onclick="showPage('home')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>🏠</span>
+      <span class="text-xs">Home</span>
+    </button>
+    <button onclick="showPage('reads')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>📚</span>
+      <span class="text-xs">My Reads</span>
+    </button>
+    <button onclick="showPage('wallet')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>💰</span>
+      <span class="text-xs">Wallet</span>
+    </button>
+    <button onclick="showPage('profile')" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <span>👤</span>
+      <span class="text-xs">Profile</span>
+    </button>
+  </nav>
 
-    async function loadDashboard() {
-      try {
-        const res = await fetch(`${API}/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
+<script>
+  const API = "https://novel-api-r1zv.onrender.com/api";
+  const token = localStorage.getItem("token");
+  if (!token) window.location = "login.html";
 
-        if (res.ok) {
-          document.getElementById("userInfo").innerHTML = `
-            <p><b>Username:</b> ${data.username}</p>
-            <p><b>Email:</b> ${data.email}</p>
-            <p><b>Role:</b> ${data.role}</p>
-            <p><b>Coins:</b> ${data.coins}</p>
-          `;
-        } else {
-          document.getElementById("userInfo").innerText = data.error || "Error loading dashboard";
-          if (res.status === 401) setTimeout(() => window.location = "login.html", 1000);
-        }
-      } catch (err) {
-        document.getElementById("userInfo").innerText = "⚠️ Network error: " + err.message;
+  async function loadUser() {
+    try {
+      const res = await fetch(`${API}/auth/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById("dashboardSection").innerText = "Failed to load user";
+        return;
       }
+
+      window.userData = data; // save globally
+      showPage('home'); // load home by default
+    } catch (err) {
+      document.getElementById("dashboardSection").innerText = "Error loading dashboard";
+    }
+  }
+
+  function showPage(page) {
+    if (page === 'home') {
+      document.getElementById("dashboardSection").innerHTML = `
+        <h2 class="text-lg font-bold mb-2">All Novels</h2>
+        <iframe src="index.html" class="w-full h-[70vh] border-0"></iframe>
+      `;
     }
 
-    function logout() {
-      localStorage.removeItem("token");
-      window.location = "login.html";
+    if (page === 'reads') {
+      document.getElementById("dashboardSection").innerHTML = `
+        <h2 class="text-lg font-bold mb-2">My Reads</h2>
+        <p class="text-gray-600">Feature coming soon...</p>
+      `;
     }
 
-    loadDashboard();
-  </script>
+    if (page === 'wallet') {
+      document.getElementById("dashboardSection").innerHTML = `
+        <h2 class="text-lg font-bold mb-2">Wallet</h2>
+        <p class="mb-2">Balance: <b>${window.userData.coins || 0} coins</b></p>
+        <button class="bg-green-500 text-white px-4 py-2 rounded">Add Coins</button>
+      `;
+    }
+
+    if (page === 'profile') {
+      document.getElementById("dashboardSection").innerHTML = `
+        <h2 class="text-lg font-bold mb-2">Profile</h2>
+        <p><b>Username:</b> ${window.userData.username}</p>
+        <p><b>Email:</b> ${window.userData.email}</p>
+        <p><b>Role:</b> ${window.userData.role}</p>
+        <button onclick="logout()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+      `;
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location = "login.html";
+  }
+
+  loadUser();
+</script>
 </body>
 </html>
