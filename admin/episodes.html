@@ -9,7 +9,12 @@
   <div class="max-w-xl mx-auto bg-white p-6 shadow rounded">
     <h1 class="text-xl font-bold mb-4">➕ Upload Episode</h1>
 
-    <input id="novelId" placeholder="Novel ID" class="border w-full mb-3 p-2 rounded">
+    <!-- Novel dropdown -->
+    <label class="block mb-2 font-semibold">Select Novel</label>
+    <select id="novelId" class="border w-full mb-3 p-2 rounded">
+      <option value="">Loading novels...</option>
+    </select>
+
     <input id="title" placeholder="Episode Title" class="border w-full mb-3 p-2 rounded">
     <textarea id="content" placeholder="Episode Content" class="border w-full mb-3 p-2 rounded"></textarea>
     <input id="price" type="number" placeholder="Price (0 = Free)" class="border w-full mb-3 p-2 rounded">
@@ -19,9 +24,26 @@
   </div>
 
   <script>
-    const API = "https://novel-api-r1zv.onrender.com/api/admin";
+    const API = "https://novel-api-r1zv.onrender.com/api";
+    const ADMIN_API = "https://novel-api-r1zv.onrender.com/api/admin";
     const token = localStorage.getItem("token");
 
+    // 🔹 Load novels into dropdown
+    async function loadNovels() {
+      try {
+        const res = await fetch(`${API}/novels`);
+        const novels = await res.json();
+
+        const select = document.getElementById("novelId");
+        select.innerHTML = novels.map(n => 
+          `<option value="${n._id}">${n.title}</option>`
+        ).join("");
+      } catch (err) {
+        document.getElementById("novelId").innerHTML = `<option>Error loading novels</option>`;
+      }
+    }
+
+    // 🔹 Upload episode
     async function uploadEpisode() {
       const novelId = document.getElementById("novelId").value;
       const title = document.getElementById("title").value;
@@ -29,8 +51,13 @@
       const price = document.getElementById("price").value;
       const msg = document.getElementById("msg");
 
+      if (!novelId) {
+        msg.innerText = "❌ Please select a novel first";
+        return;
+      }
+
       try {
-        const res = await fetch(`${API}/episode`, {
+        const res = await fetch(`${ADMIN_API}/episode`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
@@ -38,6 +65,7 @@
           },
           body: JSON.stringify({ novelId, title, content, price })
         });
+
         const data = await res.json();
         if (res.ok) {
           msg.classList.replace("text-red-500", "text-green-600");
@@ -49,6 +77,8 @@
         msg.innerText = "⚠️ Network error";
       }
     }
+
+    loadNovels();
   </script>
 </body>
 </html>
